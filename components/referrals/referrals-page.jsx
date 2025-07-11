@@ -58,6 +58,8 @@ export function ReferralsPage() {
   };
 
   const copyReferralLink = async () => {
+    if (typeof window === "undefined") return;
+
     const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
     try {
       await navigator.clipboard.writeText(referralLink);
@@ -70,6 +72,8 @@ export function ReferralsPage() {
   };
 
   const shareReferral = async () => {
+    if (typeof window === "undefined") return;
+
     const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
     const shareData = {
       title: "Join ReeseBlanks",
@@ -177,7 +181,11 @@ export function ReferralsPage() {
           <CardContent>
             <div className="flex gap-2 mb-4">
               <Input
-                value={`${window.location.origin}/register?ref=${referralCode}`}
+                value={
+                  typeof window !== "undefined"
+                    ? `${window.location.origin}/register?ref=${referralCode}`
+                    : `https://reeseblank.com/register?ref=${referralCode}`
+                }
                 readOnly
                 className="flex-1"
               />

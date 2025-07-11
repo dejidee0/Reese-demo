@@ -46,17 +46,21 @@ export function ProductDetails({ slug }) {
       return;
     }
 
-    initializePaystack(
-      user.email,
-      product.price * quantity,
-      (response) => {
-        toast.success("Payment successful!");
-        // Handle successful payment
-      },
-      () => {
-        toast.error("Payment cancelled");
-      }
-    );
+    if (typeof window !== "undefined") {
+      initializePaystack(
+        user.email,
+        product.price * quantity,
+        (response) => {
+          toast.success("Payment successful!");
+          // Handle successful payment
+        },
+        () => {
+          toast.error("Payment cancelled");
+        }
+      );
+    } else {
+      toast.error("Payment service not available");
+    }
   };
 
   if (loading) {

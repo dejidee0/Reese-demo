@@ -71,27 +71,31 @@ export function CheckoutForm() {
       if (itemsError) throw itemsError;
 
       // Initialize Paystack payment
-      initializePaystack(
-        formData.email,
-        getSubtotal(),
-        async (response) => {
-          // Update order with payment reference
-          await supabase
-            .from("orders")
-            .update({
-              payment_reference: response.reference,
-              status: "paid",
-            })
-            .eq("id", order.id);
+      if (typeof window !== "undefined") {
+        initializePaystack(
+          formData.email,
+          getSubtotal(),
+          async (response) => {
+            // Update order with payment reference
+            await supabase
+              .from("orders")
+              .update({
+                payment_reference: response.reference,
+                status: "paid",
+              })
+              .eq("id", order.id);
 
-          clearCart();
-          toast.success("Payment successful!");
-          router.push("/dashboard?tab=orders");
-        },
-        () => {
-          toast.error("Payment cancelled");
-        }
-      );
+            clearCart();
+            toast.success("Payment successful!");
+            router.push("/dashboard?tab=orders");
+          },
+          () => {
+            toast.error("Payment cancelled");
+          }
+        );
+      } else {
+        toast.error("Payment service not available");
+      }
     } catch (error) {
       console.error("Checkout error:", error);
       toast.error("Something went wrong. Please try again.");
