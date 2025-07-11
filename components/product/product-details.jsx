@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Heart, Share2, Star, Truck, Shield, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProducts } from "@/lib/hooks/useProducts";
 import { useCartStore } from "@/lib/stores/cartStore";
@@ -31,7 +32,7 @@ export function ProductDetails({ slug }) {
       setLoading(false);
     };
     fetchProduct();
-  }, [slug]);
+  }, [slug, getProduct]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -154,7 +155,7 @@ export function ProductDetails({ slug }) {
                   ))}
                 </div>
                 <span className="text-sm text-gray-600">
-                  ({product.reviews || 24} reviews)
+                  ({product.reviews_count || 24} reviews)
                 </span>
               </div>
             </div>
@@ -298,14 +299,78 @@ export function ProductDetails({ slug }) {
               <div>
                 <h4 className="font-semibold mb-2">Care Instructions</h4>
                 <p className="text-gray-600">
-                  {product.care || "Machine wash cold, tumble dry low"}
+                  {product.care_instructions ||
+                    "Machine wash cold, tumble dry low"}
                 </p>
               </div>
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="mt-6">
             <div className="space-y-4">
-              <p className="text-gray-600">Reviews coming soon...</p>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 ${
+                          i < (product.rating || 4)
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-lg font-semibold">
+                    {product.rating || 4.5} out of 5
+                  </span>
+                </div>
+                <span className="text-gray-600">
+                  Based on {product.reviews_count || 24} reviews
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {/* Sample reviews */}
+                <div className="border-b pb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-4 h-4 text-yellow-400 fill-current"
+                        />
+                      ))}
+                    </div>
+                    <span className="font-semibold">Amazing quality!</span>
+                  </div>
+                  <p className="text-gray-600 mb-2">
+                    "Love the fit and feel of this piece. The material is
+                    premium and the design is exactly what I was looking for."
+                  </p>
+                  <span className="text-sm text-gray-500">- Sarah M.</span>
+                </div>
+
+                <div className="border-b pb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1">
+                      {[...Array(4)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-4 h-4 text-yellow-400 fill-current"
+                        />
+                      ))}
+                      <Star className="w-4 h-4 text-gray-300" />
+                    </div>
+                    <span className="font-semibold">Great purchase</span>
+                  </div>
+                  <p className="text-gray-600 mb-2">
+                    "Fast shipping and excellent customer service. The product
+                    matches the description perfectly."
+                  </p>
+                  <span className="text-sm text-gray-500">- Mike D.</span>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

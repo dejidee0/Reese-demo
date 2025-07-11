@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
 import { useUserStore } from "@/lib/stores/userStore";
@@ -258,13 +257,18 @@ export function ArenaPage() {
                         %)
                       </span>
                     </div>
-                    <Progress
-                      value={getVotePercentage(
-                        battle.votes_a,
-                        battle.votes_b,
-                        "a"
-                      )}
-                    />
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-purple-600 to-orange-500 h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${getVotePercentage(
+                            battle.votes_a,
+                            battle.votes_b,
+                            "a"
+                          )}%`,
+                        }}
+                      />
+                    </div>
 
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Option B</span>
@@ -278,13 +282,18 @@ export function ArenaPage() {
                         %)
                       </span>
                     </div>
-                    <Progress
-                      value={getVotePercentage(
-                        battle.votes_a,
-                        battle.votes_b,
-                        "b"
-                      )}
-                    />
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-purple-600 to-orange-500 h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${getVotePercentage(
+                            battle.votes_a,
+                            battle.votes_b,
+                            "b"
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
