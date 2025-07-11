@@ -8,8 +8,15 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export function CartDrawer() {
-  const { items, isOpen, setIsOpen, updateQuantity, removeItem, getSubtotal } =
-    useCartStore();
+  const {
+    items,
+    isOpen,
+    setIsOpen,
+    updateQuantity,
+    removeItem,
+    getSubtotal,
+    getItemCount,
+  } = useCartStore();
   const router = useRouter();
 
   const handleCheckout = () => {
@@ -17,30 +24,37 @@ export function CartDrawer() {
     router.push("/checkout");
   };
 
+  const handleViewCart = () => {
+    setIsOpen(false);
+    router.push("/cart");
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50"
             onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-black/50 z-50"
           />
 
-          {/* Cart Drawer */}
+          {/* Drawer */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-bold">Shopping Cart</h2>
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">
+                Shopping Cart ({getItemCount()})
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -50,30 +64,29 @@ export function CartDrawer() {
               </Button>
             </div>
 
-            {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-6">
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
               {items.length === 0 ? (
-                <div className="text-center py-12">
-                  <ShoppingBag className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <p className="text-gray-500">Your cart is empty</p>
-                  <Button
-                    className="mt-4"
-                    onClick={() => {
-                      setIsOpen(false);
-                      router.push("/");
-                    }}
-                  >
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                  <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    Your cart is empty
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Add some items to get started
+                  </p>
+                  <Button onClick={() => setIsOpen(false)}>
                     Continue Shopping
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="p-4 space-y-4">
                   {items.map((item) => (
                     <div
                       key={`${item.id}-${item.size}`}
-                      className="flex gap-4 p-4 border rounded-lg"
+                      className="flex gap-3 p-3 border rounded-lg"
                     >
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden">
+                      <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
                           src={item.image_url}
                           alt={item.name}
@@ -82,12 +95,14 @@ export function CartDrawer() {
                         />
                       </div>
 
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{item.name}</h4>
-                        <p className="text-sm text-gray-600">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">
+                          {item.name}
+                        </h4>
+                        <p className="text-xs text-gray-600">
                           Size: {item.size}
                         </p>
-                        <p className="font-bold">
+                        <p className="font-semibold text-sm">
                           ₦{item.price.toLocaleString()}
                         </p>
 
@@ -95,6 +110,7 @@ export function CartDrawer() {
                           <Button
                             variant="outline"
                             size="sm"
+                            className="w-6 h-6 p-0"
                             onClick={() =>
                               updateQuantity(
                                 item.id,
@@ -103,14 +119,15 @@ export function CartDrawer() {
                               )
                             }
                           >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-3 h-3" />
                           </Button>
-                          <span className="w-8 text-center">
+                          <span className="text-sm font-medium w-8 text-center">
                             {item.quantity}
                           </span>
                           <Button
                             variant="outline"
                             size="sm"
+                            className="w-6 h-6 p-0"
                             onClick={() =>
                               updateQuantity(
                                 item.id,
@@ -119,15 +136,15 @@ export function CartDrawer() {
                               )
                             }
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3 h-3" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
+                            className="ml-auto text-red-500 hover:text-red-700"
                             onClick={() => removeItem(item.id, item.size)}
-                            className="ml-auto text-red-500"
                           >
-                            Remove
+                            <X className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -139,24 +156,29 @@ export function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="border-t p-6 space-y-4">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Subtotal</span>
-                  <span>₦{getSubtotal().toLocaleString()}</span>
+              <div className="border-t p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Total</span>
+                  <span className="text-xl font-bold">
+                    ₦{getSubtotal().toLocaleString()}
+                  </span>
                 </div>
-                <Button
-                  className="w-full bg-gradient-to-r from-purple-600 to-orange-500 hover:from-purple-700 hover:to-orange-600"
-                  onClick={handleCheckout}
-                >
-                  Checkout
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Continue Shopping
-                </Button>
+
+                <div className="space-y-2">
+                  <Button
+                    onClick={handleCheckout}
+                    className="w-full bg-gradient-to-r from-purple-600 to-orange-500"
+                  >
+                    Checkout
+                  </Button>
+                  <Button
+                    onClick={handleViewCart}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    View Cart
+                  </Button>
+                </div>
               </div>
             )}
           </motion.div>

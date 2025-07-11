@@ -12,9 +12,7 @@ export function FeaturedProducts() {
 
   useEffect(() => {
     if (products.length > 0) {
-      const featured = products
-        .filter((product) => product.is_featured)
-        .slice(0, 8);
+      const featured = products.filter((product) => product.is_featured);
       setFeaturedProducts(featured);
     }
   }, [products]);
@@ -27,13 +25,28 @@ export function FeaturedProducts() {
             <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4"></div>
             <div className="h-4 bg-gray-200 rounded w-96 mx-auto"></div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(12)].map((_, i) => (
               <div
                 key={i}
                 className="bg-white rounded-lg h-96 animate-pulse"
               ></div>
             ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (featuredProducts.length === 0) {
+    return (
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold mb-4">Featured Products</h2>
+            <p className="text-gray-600">
+              No featured products available at the moment.
+            </p>
           </div>
         </div>
       </section>
@@ -56,7 +69,7 @@ export function FeaturedProducts() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {featuredProducts.map((product, index) => (
             <motion.div
               key={product.id}

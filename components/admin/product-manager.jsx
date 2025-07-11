@@ -19,26 +19,42 @@ export function ProductManager() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
     description: "",
+    long_description: "",
     price: "",
     image_url: "",
+    images: "",
+    category_id: "",
     is_featured: false,
     is_new: false,
     stock_quantity: "",
+    materials: "",
+    care_instructions: "",
   });
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(
+          `
+          *,
+          categories (
+            id,
+            name,
+            slug
+          )
+        `
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -47,6 +63,21 @@ export function ProductManager() {
       toast.error("Error fetching products");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -66,6 +97,10 @@ export function ProductManager() {
         ...formData,
         price: parseFloat(formData.price),
         stock_quantity: parseInt(formData.stock_quantity),
+        images: formData.images
+          ? formData.images.split(",").map((url) => url.trim())
+          : null,
+        category_id: formData.category_id || null,
       };
 
       if (editingProduct) {
@@ -89,11 +124,16 @@ export function ProductManager() {
         name: "",
         slug: "",
         description: "",
+        long_description: "",
         price: "",
         image_url: "",
+        images: "",
+        category_id: "",
         is_featured: false,
         is_new: false,
         stock_quantity: "",
+        materials: "",
+        care_instructions: "",
       });
       fetchProducts();
     } catch (error) {
@@ -107,11 +147,16 @@ export function ProductManager() {
       name: product.name,
       slug: product.slug,
       description: product.description,
+      long_description: product.long_description || "",
       price: product.price.toString(),
       image_url: product.image_url,
+      images: product.images ? product.images.join(", ") : "",
+      category_id: product.category_id || "",
       is_featured: product.is_featured,
       is_new: product.is_new,
       stock_quantity: product.stock_quantity.toString(),
+      materials: product.materials || "",
+      care_instructions: product.care_instructions || "",
     });
     setIsDialogOpen(true);
   };
@@ -183,6 +228,16 @@ export function ProductManager() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="long_description">Long Description</Label>
+                <Textarea
+                  id="long_description"
+                  name="long_description"
+                  value={formData.long_description}
+                  onChange={handleInputChange}
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="price">Price (₦)</Label>
@@ -209,6 +264,24 @@ export function ProductManager() {
               </div>
 
               <div>
+                <Label htmlFor="category_id">Category</Label>
+                <select
+                  id="category_id"
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <Label htmlFor="image_url">Image URL</Label>
                 <Input
                   id="image_url"
@@ -217,6 +290,42 @@ export function ProductManager() {
                   onChange={handleInputChange}
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="images">
+                  Additional Images (comma-separated URLs)
+                </Label>
+                <Textarea
+                  id="images"
+                  name="images"
+                  value={formData.images}
+                  onChange={handleInputChange}
+                  placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="materials">Materials</Label>
+                  <Input
+                    id="materials"
+                    name="materials"
+                    value={formData.materials}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 100% Cotton"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="care_instructions">Care Instructions</Label>
+                  <Input
+                    id="care_instructions"
+                    name="care_instructions"
+                    value={formData.care_instructions}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Machine wash cold"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-4">
@@ -265,6 +374,11 @@ export function ProductManager() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-semibold text-lg">{product.name}</h3>
+                {product.categories && (
+                  <p className="text-sm text-gray-500">
+                    {product.categories.name}
+                  </p>
+                )}
                 <p className="text-gray-600">{product.description}</p>
                 <p className="text-xl font-bold mt-2">
                   ₦{product.price.toLocaleString()}
